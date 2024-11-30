@@ -15,6 +15,11 @@
         /// </summary>
         public string ReasonForError { get; private set; } = reasonForFail;
 
+        public override string ToString()
+        {
+            return ReasonForError;
+        }
+
         //private void ChangeReason(string newReason)
 
         /// <summary>
@@ -100,15 +105,6 @@
     /// </summary>
     public static class ValidationErrorExtensions
     {
-        /// <summary>
-        /// Converts the <see cref="ValidationError"/> to its string representation.
-        /// </summary>
-        /// <param name="validationError">The <see cref="ValidationError"/> instance to convert.</param>
-        /// <returns>A string that describes the reason for the validation error.</returns>
-        public static string ToString(this ValidationError validationError)
-        {
-            return validationError.ReasonForError;
-        }
 
         /// <summary>
         /// Concatenates the string representations of the specified <see cref="ValidationError"/> array, each separated by a new line.
@@ -117,7 +113,7 @@
         /// <returns>A single string containing each validation error message, separated by new lines.</returns>
         public static string Flatten(this ValidationError[] validationErrors)
         {
-            var eMsgs = validationErrors.Select(x => x.ToString());
+            var eMsgs = validationErrors.Select(x => x.ReasonForError);
             return string.Join(Environment.NewLine, eMsgs);
         }
 
@@ -130,7 +126,7 @@
         {
             ArgumentNullException.ThrowIfNull(validationError);
             
-            return new ValidationException(validationError.ToString() ?? "A validation error occurred.");
+            return new ValidationException(validationError.ReasonForError ?? "A validation error occurred.");
         }
     }
 

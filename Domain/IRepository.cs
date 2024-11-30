@@ -65,5 +65,6 @@ namespace Sisusa.Common.Domain
         /// <param name="entity">The entity to be added to the data store.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         Task AddNewAsync(T entity);
+        
     }
 }

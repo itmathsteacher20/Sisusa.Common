@@ -27,7 +27,7 @@
         /// <returns>The value if present; otherwise, the specified alternate value.</returns>
         public T OrElse(T otherValue)
         {
-            return  _value ?? otherValue;
+            return HasValue() ?  _value! : otherValue;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@
         /// <returns>The value if present; otherwise, the value returned by the supplier function.</returns>
         public T OrElseGet(Func<T> doAction)
         {
-            return _value ?? doAction();
+            return HasValue() ? _value! : doAction();
         }
 
         /// <summary>
@@ -140,7 +140,7 @@
         /// <returns>An <c>Optional</c> containing the result of applying the function, or an empty <c>Optional</c> if no value is present.</returns>
         public Optional<TU> Then<TU>(Func<T, Optional<TU>> doNext)
         {
-            return !HasValue() ? new Optional<TU>(default!) : doNext(_value!);
+            return !HasValue() ? Optional<TU>.None : doNext(_value!);
         }
 
         /// <summary>
@@ -151,6 +151,7 @@
         public void Match(Action<T> some, Action none)
         {
             var isEmpty = !HasValue();
+            //Console.WriteLine($"Empty state: {isEmpty}");
             if (isEmpty)
             {
                 none();
@@ -195,7 +196,11 @@
         /// </summary>
         /// <param name="value">The non-null value to wrap in an <c>Optional</c>.</param>
         /// <returns>An <c>Optional</c> containing the specified value.</returns>
-        public static Optional<T> Some(T value) => Of(value);
+        public static Optional<T> Some(T value)
+        {
+            ArgumentNullException.ThrowIfNull(value, nameof(value));
+            return Of(value);
+        }
 
 
         protected Optional(T? valueToWrap)

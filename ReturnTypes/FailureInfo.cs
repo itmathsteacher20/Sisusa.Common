@@ -8,7 +8,8 @@
         /// <summary>
         /// Gets the message associated with the failure.
         /// </summary>
-        public string Message { get; private set; } = message;
+        public string Message { get; private set; } = string.IsNullOrWhiteSpace(message) ? 
+            throw new ArgumentNullException(paramName: nameof(message)) : message;
 
         /// <summary>
         /// Gets the underlying exception that caused the failure.
@@ -19,6 +20,16 @@
         /// Gets the error code associated with the failure.
         /// </summary>
         public int ErrorCode { get; private set; } = errorCode;
+
+        public bool Equals(FailureInfo? other)
+        {
+            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(other, null)) return false;
+
+            return string.Equals(Message, other.Message, StringComparison.OrdinalIgnoreCase) &&
+                InnerException.Equals(other.InnerException) &&
+                ErrorCode == other.ErrorCode;
+        }
 
         /// <summary>
         /// Represents information related to a failure, including a message,

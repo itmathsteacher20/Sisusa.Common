@@ -4,7 +4,6 @@
     {
         private readonly T _value;
         private readonly FailureInfo _errorInfo;
-        private readonly bool _isError;
 
         /// <summary>
         /// Returns the encapsulated value if the current instance represents a success state;
@@ -43,7 +42,28 @@
         /// <typeparam name="TResult">The type of the result produced by the executed function.</typeparam>
         public TResult Match<TResult>(Func<T, TResult> success, Func<FailureInfo, TResult> failure)
         {
-            return IsError ? success(_value) : failure(_errorInfo);
+            if (IsError)
+            {
+                return failure(_errorInfo);
+            }
+            return success(_value);
+            //return !IsError ? success(_value) : failure(_errorInfo);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="success"></param>
+        /// <param name="failure"></param>
+        public void Match(Action<T> success, Action<FailureInfo> failure)
+        {
+            if (IsError)
+            {
+                failure(_errorInfo);
+            } else
+            {
+                success(_value);
+            }
         }
 
         /// <summary>
@@ -157,22 +177,20 @@
         /// typically due to the presence of failure information. When true,
         /// the instance carries an error and does not contain a successful result.
         /// </remarks>
-        protected bool IsError
-        {
-            get { return _isError; }
-        }
+        protected bool IsError { get; }
 
         protected FailureOr(T value)
         {
+            ArgumentNullException.ThrowIfNull(value, "Cannot wrap null value.");
             _value = value;
-            _isError = false;
+            IsError = false;
             _errorInfo = default!;
         }
 
         protected FailureOr(FailureInfo errorInfo)
         {
             _errorInfo = errorInfo;
-            _isError = true;
+            IsError = true;
             _value = default!;
         }
     }
@@ -191,7 +209,7 @@
         public static FailureOr<TU> Then<T, TU>(this FailureOr<T> failureOr, Func<T, FailureOr<TU>> doNext)
         {
             return failureOr.Match(
-                success: doNext,
+                success: value => doNext(value),
                 failure: failure => failure
             );
         }
@@ -206,8 +224,14 @@
         public static FailureOr<T> Map<T>(this FailureOr<T> failureOr, Func<T, T> mapFunc)
         {
             return failureOr.Match(
-                success: value => FailureOr<T>.Success(mapFunc(value)),
-                failure: failure => failure
+                success: value => {
+                    Console.WriteLine($"Value is {value}  mapFunc returned {mapFunc(value)}");
+                    return FailureOr<T>.Success(mapFunc(value));
+                },
+                failure: failure => {
+                    Console.WriteLine($"It's a fail {failure.Message}");
+                    return failure;
+                    }
             );
         }
 

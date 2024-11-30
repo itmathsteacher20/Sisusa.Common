@@ -132,6 +132,122 @@ public class PaginatedCustomerRepository : IPaginatedRepository<Customer, Custom
 
 In this example, `PaginatedCustomerRepository` implements `IPaginatedRepository<Customer, CustomerId>`, allowing for paginated retrieval of `Customer` entities.
 
+### **IRepositoryWithBulkOperations Interface**
+
+
+The `IRepositoryWithBulkOperations<T, TId>` interface extends the `IRepository<T, TId>` interface, providing additional bulk operation capabilities for managing entities in the data store.
+
+## Type Parameters
+
+- **T**: The type of entity the repository manages.
+- **TId**: The type of the identifier for the entity.
+
+---
+
+## Methods
+
+### `AddManyAsync(IEnumerable<T> entities)`
+
+Adds multiple new entities to the data store.
+
+#### Parameters:
+- **entities** (`IEnumerable<T>`): A collection of entities to be added.
+
+#### Returns:
+- A `Task` representing the asynchronous operation.
+
+#### Example Usage:
+```csharp
+await repository.AddManyAsync(new List<MyEntity> { entity1, entity2 });
+```
+
+---
+
+### `UpdateManyAsync(IEnumerable<T> entities)`
+
+Updates multiple entities in the data store.
+
+#### Parameters:
+- **entities** (`IEnumerable<T>`): A collection of entities to be updated.
+
+#### Returns:
+- A `Task` representing the asynchronous operation.
+
+#### Example Usage:
+```csharp
+await repository.UpdateManyAsync(new List<MyEntity> { entity1, entity2 });
+```
+
+---
+
+### `UpdateWhereAsync(Expression<Func<T, bool>> filter, Expression<Func<T, T>> updateExpression)`
+
+Updates the entities in the data store that match the specified filter with the provided update expression.
+
+#### Parameters:
+- **filter** (`Expression<Func<T, bool>>`): A filter expression to select the entities to be updated.
+- **updateExpression** (`Expression<Func<T, T>>`): An expression defining the updates to apply to the filtered entities.
+
+#### Returns:
+- A `Task` representing the asynchronous operation.
+
+#### Example Usage:
+```csharp
+await repository.UpdateWhereAsync(
+    x => x.LastLoginDate < DateTime.Now.AddMonths(-3),
+    x => new MyEntity { IsActive = false }
+);
+```
+
+---
+
+### `DeleteWhereAsync(Expression<Func<T, bool>> filter)`
+
+Deletes entities from the data store that match the specified filter.
+
+#### Parameters:
+- **filter** (`Expression<Func<T, bool>>`): A filter expression to select the entities to be deleted.
+
+#### Returns:
+- A `Task` representing the asynchronous operation, with a boolean indicating success or failure.
+
+#### Example Usage:
+```csharp
+await repository.DeleteWhereAsync(x => x.IsActive == false);
+```
+
+---
+
+## Example
+
+Here is an example of using all methods in this interface:
+
+```csharp
+// Adding multiple entities
+await repository.AddManyAsync(new List<MyEntity> { entity1, entity2 });
+
+// Updating multiple entities
+await repository.UpdateManyAsync(new List<MyEntity> { entity1, entity2 });
+
+// Updating entities with a filter
+await repository.UpdateWhereAsync(
+    x => x.LastLoginDate < DateTime.Now.AddMonths(-3),
+    x => new MyEntity { IsActive = false }
+);
+
+// Deleting entities with a filter
+await repository.DeleteWhereAsync(x => x.IsActive == false);
+```
+
+---
+
+#### Notes
+
+- The `AddManyAsync`, `UpdateManyAsync`, `UpdateWhereAsync`, and `DeleteWhereAsync` methods should be used when performing bulk operations that impact multiple entities.
+- It is recommended to implement these methods only when needed as they may not be required in all repository implementations.
+
+
+
 ---
 
 ### **ValueObject Class**
