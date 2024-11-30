@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Title>A collection of utility classes  for dirty DDD and also simplifying the handling of return types(aprtifparticularly returns that might have have an 'either or' type of result)</Title>
+        <Authors>T_Dlamini</Authors>
+        <Description>This project provides a foundational framework for building robust domain-driven applications. It emphasizes clean architecture principles, with a focus on clearly defined domain logic and flexible error handling. The project is organized into two primary components:
+
+Domain Models
+
+Entitys: Represents a base class for aggregate roots or domain entities, encapsulating core business rules and behaviors.
+EntityId.cs: Provides a strongly-typed identifier pattern to uniquely distinguish entities, supporting domain-driven design principles.
+ValueObject: Implements immutable value objects that represent concepts with equality determined by their properties rather than identity.
+IRepository: Defines a generic repository interface for managing entity persistence and retrieval, ensuring abstraction between domain and data layers.
+IPaginatedRepository: Extends the repository concept by adding support for paginated data retrieval, enabling efficient data handling in applications.
+Error Handling and Result Wrappers
+
+FailureOrNothing: Encapsulates operations that may fail but do not return a result, allowing for streamlined error tracking.
+FailureOr: Provides a unified way to return either a success result or failure details, reducing error-prone conditional logic in the application.
+FailureInfo: Encodes detailed information about errors or failures, ensuring clarity and consistency in error reporting across the system.
+The project is designed for scalability, maintainability, and ease of use in modern application development. It encourages a separation of concerns and enforces best practices for handling domain logic and application-level errors.</Description>
+        <Copyright>Private</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>Domain;Railway;Result Pattern;</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Update="README.md">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
+
+</Project>
