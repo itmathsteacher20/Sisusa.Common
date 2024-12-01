@@ -51,6 +51,20 @@
         }
 
         /// <summary>
+        /// Asynchronously matches the current state of the instance by executing the appropriate function
+        /// depending on whether the instance represents a success or an error state.
+        /// </summary>
+        /// <param name="success">A function to execute if the instance represents a success state.</param>
+        /// <param name="failure">A function to execute if the instance represents an error state.</param>
+        /// <typeparam name="TResult">The type of the result returned by the matching functions.</typeparam>
+        /// <returns>A task that represents the asynchronous operation, containing the result of the executed function.</returns>
+        public Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> success,
+            Func<FailureInfo, Task<TResult>> failure)
+        {
+            return IsError ? failure(_errorInfo) : success(_value);
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="success"></param>
@@ -215,6 +229,27 @@
         }
 
         /// <summary>
+        /// Asynchronously processes the encapsulated value using the provided function if the current instance
+        /// represents a success state. If the instance represents a failure state, it returns a failed result with
+        /// the current error information.
+        /// </summary>
+        /// <param name="failureOr">The instance of <c>FailureOr&lt;T&gt;</c> to evaluate for success or error state.</param>
+        /// <param name="doNext">A function to execute if the current instance is successful, returning a task that yields
+        /// a <c>FailureOr&lt;TU&gt;</c> result.</param>
+        /// <typeparam name="T">The type of the value contained within the successful <c>FailureOr</c>.</typeparam>
+        /// <typeparam name="TU">The type of the value to be contained within the resulting <c>FailureOr</c> after the transformation.</typeparam>
+        /// <returns>A task representing the asynchronous operation, containing a new <c>FailureOr&lt;TU&gt;</c> which is either
+        /// the result of the executed function or the current failure.</returns>
+        public static Task<FailureOr<TU>> ThenAsync<T, TU>(this FailureOr<T> failureOr,
+            Func<T, Task<FailureOr<TU>>> doNext)
+        {
+            return failureOr.MatchAsync<FailureOr<TU>>(
+                success: async value => await doNext(value),
+                failure: failure => Task.FromResult(FailureOr<TU>.Failure(failure))
+            );
+        }
+
+        /// <summary>
         /// Applies a transformation function to the contained value if the instance is in a success state;
         /// otherwise, returns the current failure state unchanged.
         /// </summary>
@@ -246,6 +281,24 @@
             return failureOr.Match(
                 success: value => FailureOr<TU>.Success(mapFunc(value)),
                 failure: failure => failure
+            );
+        }
+
+        /// <summary>
+        /// Asynchronously transforms the encapsulated value in a success state into a new value using
+        /// the provided asynchronous mapping function, or retains the error state as is.
+        /// </summary>
+        /// <param name="failureOr">The instance of <see cref="FailureOr{T}"/> to be transformed.</param>
+        /// <param name="mapFunc">The asynchronous function to apply to the encapsulated value if in a success state.</param>
+        /// <typeparam name="T">The type of the encapsulated value in the original success state.</typeparam>
+        /// <typeparam name="TU">The type of the encapsulated value in the resulting success state after transformation.</typeparam>
+        /// <returns>A task representing the asynchronous operation, returning a new instance of <see cref="FailureOr{TU}"/>
+        /// that represents either the transformed success or the original error state.</returns>
+        public static Task<FailureOr<TU>> MapAsync<T, TU>(this FailureOr<T> failureOr, Func<T, Task<TU>> mapFunc)
+        {
+            return failureOr.MatchAsync<FailureOr<TU>>(
+                success: async value => FailureOr<TU>.Success(await mapFunc(value)),
+                failure: failure => Task.FromResult(FailureOr<TU>.Failure(failure))
             );
         }
 

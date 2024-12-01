@@ -162,6 +162,27 @@
             }
         }
 
+        /// <summary>
+        /// Asynchronously executes the specified asynchronous function if the current <c>Optional</c> instance contains
+        /// a value, or executes the provided asynchronous action if the instance is empty.
+        /// </summary>
+        /// <param name="some">The asynchronous function to execute if a value is present. The function takes the value as a parameter.</param>
+        /// <param name="none">The asynchronous action to execute if the current <c>Optional</c> instance is empty.</param>
+        /// <returns>A <c>Task</c> representing the asynchronous operation.</returns>
+        public async Task MatchAsync(Func<T, Task<Action<T>>> some, Func<Task<Action>> none)
+        {
+            var isEmpty = !HasValue();
+            //Console.WriteLine($"Empty state: {isEmpty}");
+            if (isEmpty)
+            {
+                await none();
+            }
+            else
+            {
+                await some(_value!);
+            }
+        }
+
 
         /// <summary>
         /// Creates an <c>Optional</c> instance containing the specified value, if it is not null.

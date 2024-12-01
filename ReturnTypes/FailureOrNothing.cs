@@ -66,6 +66,21 @@
         }
 
         /// <summary>
+        /// Executes an asynchronous action if the current instance does not signify an error.
+        /// </summary>
+        /// <param name="doAction">The asynchronous action to be executed if no error is present.</param>
+        /// <returns>A task representing the asynchronous operation. The task result contains a new <see cref="FailureOrNothing"/> instance that signifies success or failure based on the action outcome.</returns>
+        public Task<FailureOrNothing> ThenAsync(Func<Task> doAction)
+        {
+            if (IsError)
+            {
+                return Task.FromResult(this);
+            }
+            return doAction().ContinueWith(task => task.IsFaulted ?
+                Failure(FailureInfo.FromException(task.Exception!, "Action threw an exception")) : Success());
+        }
+
+        /// <summary>
         /// Executes the provided functions based on the result state of the current instance.
         /// </summary>
         /// <typeparam name="TResult">The return type of the functions to be executed.</typeparam>
@@ -73,6 +88,19 @@
         /// <param name="failure">The function to execute if the result signifies failure, with the failure information provided.</param>
         /// <returns>The result of the executed function, either the success function or the failure function.</returns>
         public TResult Match<TResult>(Func<TResult> success, Func<FailureInfo, TResult> failure)
+        {
+            return IsError ? failure(Error) : success();
+        }
+
+        /// <summary>
+        /// Asynchronously matches the result of an operation and executes the corresponding function
+        /// based on whether the operation signifies a success or a failure.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result returned by the matching functions.</typeparam>
+        /// <param name="success">A function to execute if the operation signifies success, returning a <typeparamref name="TResult"/>.</param>
+        /// <param name="failure">A function to execute if the operation signifies failure, returning a <typeparamref name="TResult"/> with failure information.</param>
+        /// <returns>A task that represents the asynchronous operation, containing the result of type <typeparamref name="TResult"/>.</returns>
+        public Task<TResult> MatchAsync<TResult>(Func<Task<TResult>> success, Func<FailureInfo, Task<TResult>> failure)
         {
             return IsError ? failure(Error) : success();
         }
